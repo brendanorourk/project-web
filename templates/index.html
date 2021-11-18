@@ -14,39 +14,57 @@
     </style>
 </head>
 <body>
-    
-    <div class="col-lg-10 mx-auto p-3 py-md-5">
+    <div class="col-lg-8 mx-auto p-3 py-md-5">
         <main>
             <section>
-                <h1 class="pb-3">Bainflix Personalised Movie Recommendations</h1>
+                <h1 class="pb-3">Movie Recommendations</h1>
                 <p>Choose the movies you like!</p>
-    
-                <ol id="responses"></ol>
                 <form id="movieForm" class="my-5">
+                    {% for ItemID, MovieTitle, Rating in suggests %}
                     <div class="form-check">
-                        <input type="checkbox" name="their_movies" value="1" class="form-check-input" id="exampleCheck1">
-                        <label class="form-check-label" for="exampleCheck1">FilmA 4.5</label>
+                        <input type="checkbox" name="their_movies" value="{{ItemID}}" class="form-check-input" id="exampleCheck1">
+                        <label class="form-check-label" for="exampleCheck1">{{MovieTitle}} {{Rating}}</label>
                     </div>
+                    {% endfor %}
                     <button type="submit" class="btn btn-primary my-5">Recommend!</button>
                 </form>
+    
             </section>
-
-        <hr/>
+    
             <section id="recommendations">
                 <h3>The Recommendations</h3>
-            
-                {% for ItemID, MovieTitle, Rating in suggests %}
-                <div class="form-check">
-                    <input type="checkbox" name="their_movies" value="{{ItemID}}" class="form-check-input" id="exampleCheck1">
-                    <label class="form-check-label" for="exampleCheck1">{{MovieTitle}} {{Rating}}</label>
-                </div>
-                {% endfor %}
+                <ol id="responses"></ol>
 
 
-                
 
             </section>
         </main>
     </div>
+
+    
+<script type="text/javascript">
+    $('#recommendations').toggle();
+    
+    $('#movieForm').on('submit', function(e){
+        e.preventDefault();
+        $.ajax({
+            url: "{{api_url}}/api/v1/sample/movies/recommend",
+            type: "GET",
+            data: $("#movieForm").serialize(),
+            success: data => {
+                $('#responses').empty();
+                $('#recommendations').toggle();
+    
+                    Object
+                    .entries(data['movies'])
+                    .sort( (l, r) => r[1] - l[1] )
+                    .forEach(([movie, rating], _) => 
+                        $('#responses').append(`<li>${movie} ${rating * data['score']}% </li>`)
+                    )
+            }
+        });
+    }); 
+    </script>
+    
 </body>
 </html>
