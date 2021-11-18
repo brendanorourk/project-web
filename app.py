@@ -7,7 +7,13 @@ app = Flask(__name__)
 
 @app.route("/")
 def movie():
-    return render_template('index.html')
+    with sqlite3.connect("app/db/movie.db") as c:
+        return render_template('index.html', suggests=c.execute("""
+            SELECT ItemID, MovieTitle, ROUND(Rating, 1) FROM movies 
+            ORDER BY Rating DESC
+            LIMIT 20 
+        """))
+
 
 @app.route("/sample")
 def movie_sample():
